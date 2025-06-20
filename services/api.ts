@@ -114,49 +114,26 @@ export interface LoginResponse {
   token_type: string
 }
 
-// Authentication API
+// API Functions
+
+// Authentication
 export const authAPI = {
   login: async (data: LoginData): Promise<LoginResponse> => {
-    try {
-      const response = await apiClient.post("/auth/login", data)
-      return response.data
-    } catch (error: any) {
-      // Handle network/connection errors
-      if (error.code === "ECONNREFUSED" || error.message === "Network Error" || !error.response) {
-        throw new Error("Cannot connect to server. Please ensure the backend is running on " + API_BASE_URL)
-      }
-      // Re-throw other errors (like 401, 400, etc.)
-      throw error
-    }
+    const response = await apiClient.post("/auth/login", data)
+    return response.data
   },
 
   getCurrentUser: async (): Promise<User> => {
-    try {
-      const response = await apiClient.get("/auth/me")
-      return response.data
-    } catch (error: any) {
-      if (error.code === "ECONNREFUSED" || error.message === "Network Error" || !error.response) {
-        throw new Error("Cannot connect to server. Please ensure the backend is running.")
-      }
-      throw error
-    }
+    const response = await apiClient.get("/auth/me")
+    return response.data
   },
 
   logout: async (): Promise<void> => {
-    try {
-      await apiClient.post("/auth/logout")
-    } catch (error: any) {
-      // For logout, we can ignore connection errors since we're clearing local storage anyway
-      if (error.code === "ECONNREFUSED" || error.message === "Network Error" || !error.response) {
-        console.warn("Could not reach server for logout, but clearing local session")
-        return
-      }
-      throw error
-    }
+    await apiClient.post("/auth/logout")
   },
 }
 
-// Users API
+// Users
 export const usersAPI = {
   createUser: async (data: CreateUserData): Promise<User> => {
     const response = await apiClient.post("/users/", data)
@@ -179,27 +156,13 @@ export const usersAPI = {
   },
 
   updateUser: async (userId: number, data: UpdateUserData): Promise<User> => {
-    console.log("API: updateUser called", { userId, data })
-    try {
-      const response = await apiClient.put(`/users/${userId}`, data)
-      console.log("API: updateUser response", response.data)
-      return response.data
-    } catch (error) {
-      console.error("API: updateUser error", error)
-      throw error
-    }
+    const response = await apiClient.put(`/users/${userId}`, data)
+    return response.data
   },
 
   toggleUserStatus: async (userId: number): Promise<User> => {
-    console.log("API: toggleUserStatus called", { userId })
-    try {
-      const response = await apiClient.post(`/users/${userId}/toggle-status`)
-      console.log("API: toggleUserStatus response", response.data)
-      return response.data
-    } catch (error) {
-      console.error("API: toggleUserStatus error", error)
-      throw error
-    }
+    const response = await apiClient.post(`/users/${userId}/toggle-status`)
+    return response.data
   },
 
   getTeamStats: async (managerId: number): Promise<any> => {
@@ -208,7 +171,7 @@ export const usersAPI = {
   },
 }
 
-// Feedback API
+// Feedback
 export const feedbackAPI = {
   createFeedback: async (data: CreateFeedbackData): Promise<Feedback> => {
     const response = await apiClient.post("/feedback/", data)
@@ -241,7 +204,7 @@ export const feedbackAPI = {
   },
 }
 
-// Dashboard API
+// Dashboard
 export const dashboardAPI = {
   getStats: async (): Promise<DashboardStats> => {
     const response = await apiClient.get("/dashboard/stats")

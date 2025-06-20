@@ -38,12 +38,58 @@ export function FeedbackForm({ teamMembers, onSubmit, onCancel }: FeedbackFormPr
     setLoading(true)
     setError("")
 
+    // Validate form
+    if (!formData.employee_id) {
+      setError("Please select a team member")
+      setLoading(false)
+      return
+    }
+
+    if (!formData.strengths.trim()) {
+      setError("Please provide strengths feedback")
+      setLoading(false)
+      return
+    }
+
+    if (!formData.areas_to_improve.trim()) {
+      setError("Please provide areas to improve feedback")
+      setLoading(false)
+      return
+    }
+
+    if (!formData.sentiment) {
+      setError("Please select a sentiment")
+      setLoading(false)
+      return
+    }
+
+    if (formData.strengths.trim().length < 10) {
+      setError("Strengths feedback must be at least 10 characters")
+      setLoading(false)
+      return
+    }
+
+    if (formData.areas_to_improve.trim().length < 10) {
+      setError("Areas to improve feedback must be at least 10 characters")
+      setLoading(false)
+      return
+    }
+
     try {
+      console.log("Submitting feedback:", formData)
       await onSubmit({
         employee_id: Number.parseInt(formData.employee_id),
-        strengths: formData.strengths,
-        areas_to_improve: formData.areas_to_improve,
+        strengths: formData.strengths.trim(),
+        areas_to_improve: formData.areas_to_improve.trim(),
         sentiment: formData.sentiment as "positive" | "neutral" | "negative",
+      })
+
+      // Reset form on success
+      setFormData({
+        employee_id: "",
+        strengths: "",
+        areas_to_improve: "",
+        sentiment: "",
       })
     } catch (error: any) {
       console.error("Error submitting feedback:", error)
@@ -91,6 +137,7 @@ export function FeedbackForm({ teamMembers, onSubmit, onCancel }: FeedbackFormPr
               required
               disabled={loading}
             />
+            <p className="text-xs text-gray-500">Minimum 10 characters</p>
           </div>
 
           <div className="space-y-2">
@@ -104,6 +151,7 @@ export function FeedbackForm({ teamMembers, onSubmit, onCancel }: FeedbackFormPr
               required
               disabled={loading}
             />
+            <p className="text-xs text-gray-500">Minimum 10 characters</p>
           </div>
 
           <div className="space-y-2">
