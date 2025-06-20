@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { CreateEmployeeForm } from "@/components/create-employee-form"
 import { UserPlus, Users, Mail, Calendar, MoreVertical, Edit, Trash2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { EditUserDialog } from "@/components/edit-user-dialog"
 
 interface User {
   id: number
@@ -43,6 +44,8 @@ export function EmployeeManagement({
 }: EmployeeManagementProps) {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
   const handleCreateEmployee = async (employeeData: CreateEmployeeData) => {
     setLoading(true)
@@ -191,10 +194,8 @@ export function EmployeeManagement({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => {
-                            if (onUpdateEmployee) {
-                              // For demo, just toggle some property
-                              console.log("Edit employee:", member.id)
-                            }
+                            setEditingUser(member)
+                            setShowEditDialog(true)
                           }}
                         >
                           <Edit className="w-4 h-4 mr-2" />
@@ -203,7 +204,12 @@ export function EmployeeManagement({
                         <DropdownMenuItem
                           onClick={() => {
                             if (onDeactivateEmployee) {
-                              onDeactivateEmployee(member.id)
+                              const action = member.is_active ? "deactivate" : "activate"
+                              if (confirm(`Are you sure you want to ${action} ${member.username}?`)) {
+                                onDeactivateEmployee(member.id).catch((error) => {
+                                  alert(`Failed to ${action} user: ${error.message}`)
+                                })
+                              }
                             }
                           }}
                           className="text-red-600"
@@ -220,6 +226,17 @@ export function EmployeeManagement({
           )}
         </CardContent>
       </Card>
+      <EditUserDialog
+        user={editingUser}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onSave={async (userId, updates) => {
+          if (onUpdateEmployee) {
+            await onUpdateEmployee(userId, updates)
+            setEditingUser(null)
+          }
+        }}
+      />
     </div>
   )
 }

@@ -144,21 +144,30 @@ export function ManagerDashboard({ user }: ManagerDashboardProps) {
   }
 
   const handleUpdateEmployee = async (employeeId: number, updates: Partial<User>): Promise<void> => {
+    console.log("Updating employee:", employeeId, updates)
     try {
       await usersAPI.updateUser(employeeId, updates)
+      console.log("Employee updated successfully")
 
       // Reload team data
       const updatedTeam = await usersAPI.getMyTeam()
       setTeamMembers(updatedTeam)
+
+      // Show success message
+      alert("Employee updated successfully!")
     } catch (error: any) {
       console.error("Error updating employee:", error)
-      throw new Error(error.response?.data?.detail || "Failed to update employee")
+      const errorMessage = error.response?.data?.detail || error.message || "Failed to update employee"
+      alert(`Error: ${errorMessage}`)
+      throw new Error(errorMessage)
     }
   }
 
   const handleDeactivateEmployee = async (employeeId: number): Promise<void> => {
+    console.log("Toggling employee status:", employeeId)
     try {
-      await usersAPI.toggleUserStatus(employeeId)
+      const updatedUser = await usersAPI.toggleUserStatus(employeeId)
+      console.log("Employee status toggled successfully:", updatedUser)
 
       // Reload team data
       const updatedTeam = await usersAPI.getMyTeam()
@@ -166,9 +175,15 @@ export function ManagerDashboard({ user }: ManagerDashboardProps) {
 
       setTeamMembers(updatedTeam)
       setStats(updatedStats)
+
+      // Show success message
+      const action = updatedUser.is_active ? "activated" : "deactivated"
+      alert(`Employee ${action} successfully!`)
     } catch (error: any) {
       console.error("Error toggling employee status:", error)
-      throw new Error(error.response?.data?.detail || "Failed to update employee status")
+      const errorMessage = error.response?.data?.detail || error.message || "Failed to update employee status"
+      alert(`Error: ${errorMessage}`)
+      throw new Error(errorMessage)
     }
   }
 
